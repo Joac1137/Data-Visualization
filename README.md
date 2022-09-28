@@ -8,3 +8,10 @@ An important part of the Data Visualization course is the semester-long course p
     <li>To find out whether data visualization is actually your thing and which aspects of it you like best (graphic design, software engineering, data analytics, visual storytelling / data journalism,...) </li>
     <li>To prepare you for a potential MSc thesis project in visualization. </li>
 </ul>
+
+
+In order to install geopandas on windows run the following commands:
+pip install pipwin
+pipwin install gdal
+pipwin install fiona
+pip install geopandas
