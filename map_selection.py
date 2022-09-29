@@ -24,21 +24,21 @@ data_geojson = alt.InlineData(values=gdf.to_json(), format=alt.DataFormat(proper
 
 # chart object
 char = alt.Chart(data).mark_geoshape().encode(
-    color='value:Q'
+    color='time_value:Q'
 ).properties(
     width=500,
     height=300
 )
 
 
-columns = df.columns.to_list()[1:]
+columns = df.columns.to_list()[1:5]
 
 time_dropdown = alt.binding_select(options=columns, name='Time')
 time_selection = alt.selection_single(fields=['Time'], bind=time_dropdown)
 
 char = char.transform_fold(
     columns,
-    as_=['Time', 'value']
+    as_=['Time', 'time_value']
 ).transform_filter(
     time_selection  
 ).add_selection(
@@ -47,22 +47,16 @@ char = char.transform_fold(
 
 
 
-#municipality = df['label_dk'].tolist()
-single = alt.selection_single()
-
-# char = char.add_selection(
-#     single
-# )
-
+municipality_selection = alt.selection_single()
 
 
 char = char.add_selection(
-    single
+    municipality_selection
 ).encode(
     color=alt.condition(
-        single, 
+        municipality_selection, 
         alt.Color(
-            "value:Q",
+            "time_value:Q",
             scale=alt.Scale(
                 scheme='viridis')
         ), 
@@ -72,9 +66,14 @@ char = char.add_selection(
 
 hist = alt.Chart(data).mark_bar().encode(
     x='value:N',
-    y='2007K1:Q'
+    y='time_value:Q'
 ).transform_filter(
-    single
+    municipality_selection
+).transform_fold(
+    columns,
+    as_=['Time', 'time_value']
+).transform_filter(
+    time_selection
 )
 
 charts = alt.concat(char, hist)
