@@ -21,33 +21,62 @@ data = data.fillna(0)
 # define inline geojson data object
 data_geojson = alt.InlineData(values=gdf.to_json(), format=alt.DataFormat(property='features',type='json')) 
 
-columns = df.columns.to_list()[1:]
-
-time_dropdown = alt.binding_select(options=columns, name='Time')
-time_selection = alt.selection_single(fields=['Time'], bind=time_dropdown)
-# single = alt.selection_single()
-
-# color=alt.condition(
-#         single, 
-#         alt.Color(
-#             "2007K1:Q",
-#             scale=alt.Scale(
-#                 scheme='viridis')
-#         ), 
-#         alt.value('lightgray'))
 
 # chart object
-char = alt.Chart(data).transform_fold(
-    columns,
-    as_=['Time', 'value']
-).transform_filter(
-    time_selection  
-).mark_geoshape().encode(
+char = alt.Chart(data).mark_geoshape().encode(
     color='value:Q'
-).add_selection(
-    time_selection
 ).properties(
     width=500,
     height=300
 )
-char.show()
+
+
+columns = df.columns.to_list()[1:]
+
+time_dropdown = alt.binding_select(options=columns, name='Time')
+time_selection = alt.selection_single(fields=['Time'], bind=time_dropdown)
+
+char = char.transform_fold(
+    columns,
+    as_=['Time', 'value']
+).transform_filter(
+    time_selection  
+).add_selection(
+    time_selection
+)
+
+
+
+#municipality = df['label_dk'].tolist()
+single = alt.selection_single()
+
+# char = char.add_selection(
+#     single
+# )
+
+
+
+char = char.add_selection(
+    single
+).encode(
+    color=alt.condition(
+        single, 
+        alt.Color(
+            "value:Q",
+            scale=alt.Scale(
+                scheme='viridis')
+        ), 
+        alt.value('lightgray'))
+)
+
+
+hist = alt.Chart(data).mark_bar().encode(
+    x='value:N',
+    y='2007K1:Q'
+).transform_filter(
+    single
+)
+
+charts = alt.concat(char, hist)
+
+charts.show()
