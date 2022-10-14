@@ -17,8 +17,11 @@ gdf = gdf.dissolve(by='label_dk')
 df = pd.read_csv("data/mini_crimes.csv", encoding="utf_8")
 df = df.rename(columns={'område': 'label_dk', "overtrædelsens art": "offence"})
 df = df.astype({'Anmeldte forbrydelser': 'int32'})
+df['tid'] = df['tid'].apply(lambda x : x[:-2])
+df = df.groupby(['tid','offence','label_dk'])['Anmeldte forbrydelser'].sum().reset_index()
 
 big_fuck_df = gdf.merge(df, how='left', on='label_dk')
+print(big_fuck_df.columns)
 
 
 
@@ -30,7 +33,7 @@ area_selection = alt.selection_single(fields=['label_dk'])
 
 
 
-bar_chart = alt.Chart(df).mark_bar(
+bar_chart = alt.Chart().mark_bar(
 ).transform_filter(
     time_selection
 ).transform_filter(
@@ -44,11 +47,14 @@ bar_chart = alt.Chart(df).mark_bar(
     color=alt.condition(
         offence_selection, alt.value('red'), alt.value('lightgray')
     )
-).add_selection(offence_selection)
+).add_selection(offence_selection).properties(
+    width=400,
+    height=300
+)
 
 
 
-line_chart = alt.Chart(df).mark_line(
+line_chart = alt.Chart().mark_line(
 ).transform_filter(
     offence_selection
 ).transform_filter(
@@ -59,11 +65,14 @@ line_chart = alt.Chart(df).mark_line(
 ).encode(
     x='tid:O',
     y='crime:Q'
-).add_selection(time_selection)
+).add_selection(time_selection).properties(
+    width=400,
+    height=300
+)
 
 
 
-map_chart = alt.Chart(big_fuck_df).mark_geoshape(
+map_chart = alt.Chart().mark_geoshape(
 ).transform_filter(
     time_selection
 ).transform_filter(
@@ -83,5 +92,7 @@ map_chart = alt.Chart(big_fuck_df).mark_geoshape(
 ).add_selection(area_selection)
 
 
-chart = bar_chart | line_chart | map_chart
-chart.show()
+data_chart = alt.hconcat(alt.vconcat(line_chart,bar_chart),map_chart,data=big_fuck_df)
+
+
+data_chart.show()
