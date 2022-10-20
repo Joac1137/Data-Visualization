@@ -7,8 +7,8 @@ spacing = 60
 
 
 alt.data_transformers.enable('data_server')
-file = "small_umbrella_terms_crimes_from_2020"
-#file = "small_umbrella_terms_crimes_quarters"
+#file = "small_umbrella_terms_crimes_from_2020"
+file = "small_umbrella_terms_crimes_quarters"
 
 big_fuck_df = gpd.read_file("data_with_geo/" + file +".geojson")
 
