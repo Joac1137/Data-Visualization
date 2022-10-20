@@ -104,6 +104,9 @@ Umbrella_crime = {"Seksualforbrydelser i alt":"11",
 				  "Andre straffelovsforbrydelser i alt":"14",
 				  "Særlove i alt":"3",
 }
+
+few_umbrella_crime = {"Seksualforbrydelser i alt":"11",
+				  "Voldsforbrydelser i alt":"12",}
 CRIME = {
 #"Overtrædelsens art i alt":"TOT",
 #"Straffelov i alt":"1",
@@ -338,3 +341,7 @@ time_from_2020 = {"2020K1":"2020K1",
 				  "2021K4":"2021K4",
 				  "2022K1":"2022K1",
 				  "2022K2":"2022K2"}
+time_2021 = {	  "2021K1":"2021K1",
+				  "2021K2":"2021K2",
+				  "2021K3":"2021K3",
+				  "2021K4":"2021K4",}

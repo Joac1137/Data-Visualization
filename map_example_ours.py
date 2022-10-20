@@ -1,35 +1,21 @@
-import pandas as pd
 import altair as alt
 import geopandas as gpd
-import valuecodes
-import matplotlib as plt
 
-alt.data_transformers.enable('default', max_rows=None)
-
-url = 'https://raw.githubusercontent.com/magnuslarsen/geoJSON-Danish-municipalities/master/municipalities/municipalities.geojson'
-gdf = gpd.read_file(url)
-gdf = gdf[['label_dk','geometry']]
-gdf.loc[gdf.label_dk == 'Århus', 'label_dk'] = "Aarhus"
-gdf.loc[gdf.label_dk == 'Brønderslev-Dronninglund', 'label_dk'] = "Brønderslev"
-gdf.loc[gdf.label_dk == 'Vesthimmerland', 'label_dk'] = "Vesthimmerlands"
-gdf = gdf.dissolve(by='label_dk')
-
-df = pd.read_csv("data/mini_crimes.csv", encoding="utf_8")
-df = df.rename(columns={'område': 'label_dk', "overtrædelsens art": "offence"})
-df = df.astype({'Anmeldte forbrydelser': 'int32'})
-df['tid'] = df['tid'].apply(lambda x : x[:-2])
-df = df.groupby(['tid','offence','label_dk'])['Anmeldte forbrydelser'].sum().reset_index()
-
-big_fuck_df = gdf.merge(df, how='left', on='label_dk')
-print(big_fuck_df.columns)
+height = 200
+width = 200
+spacing = 60
 
 
+alt.data_transformers.enable('data_server')
+file = "small_umbrella_terms_crimes_from_2020"
+#file = "small_umbrella_terms_crimes_quarters"
+
+big_fuck_df = gpd.read_file("data_with_geo/" + file +".geojson")
 
 
-offence_selection = alt.selection_single(init={'offence':'Voldtægt mv.'})
+offence_selection = alt.selection_single(init={'offence':'Seksualforbrydelser i alt'})
 time_selection = alt.selection_interval(encodings=['x'])
 area_selection = alt.selection_single(fields=['label_dk'])
-
 
 
 
@@ -42,19 +28,20 @@ bar_chart = alt.Chart().mark_bar(
     crime='sum(Anmeldte forbrydelser)',
     groupby=['offence']
 ).encode(
-    x='offence:N',
-    y='crime:Q',
+    x=alt.X('offence:N', sort='y'),
+    y=alt.Y(
+        'crime:Q',
+        scale=alt.Scale(type="log",domainMin=1)  # Here the scale is applied
+    ),
     color=alt.condition(
         offence_selection, alt.value('red'), alt.value('lightgray')
-    )
-).add_selection(offence_selection).properties(
-    width=400,
-    height=300
-)
+    ),
+    tooltip=['offence','crime:Q']
+).add_selection(offence_selection).properties(width="container")
 
 
 
-line_chart = alt.Chart().mark_line(
+line_chart = alt.Chart().mark_line(interpolate='step-after',point=alt.OverlayMarkDef(color="blue")
 ).transform_filter(
     offence_selection
 ).transform_filter(
@@ -64,11 +51,9 @@ line_chart = alt.Chart().mark_line(
     groupby=['tid']
 ).encode(
     x='tid:O',
-    y='crime:Q'
-).add_selection(time_selection).properties(
-    width=400,
-    height=300
-)
+    y='crime:Q',
+    tooltip=['tid','crime:Q']
+).add_selection(time_selection).properties(width="container")
 
 
 
@@ -88,11 +73,17 @@ map_chart = alt.Chart().mark_geoshape(
             scale=alt.Scale(
                 scheme='viridis')
         ),
-        alt.value('lightgray'))
-).add_selection(area_selection)
+        alt.value('lightgray')),
+    tooltip=['label_dk','crime:Q']
+).add_selection(area_selection).properties(
+    height=800,
+    width=600
+)
 
+column_chart = alt.vconcat(line_chart,bar_chart,spacing=spacing, data=big_fuck_df)
 
-data_chart = alt.hconcat(alt.vconcat(line_chart,bar_chart),map_chart,data=big_fuck_df)
+data_chart = alt.hconcat(map_chart,column_chart,data=big_fuck_df, spacing=spacing).resolve_scale(color='independent')
 
 
 data_chart.show()
+

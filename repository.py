@@ -123,8 +123,8 @@ def CreateSmallUmbrellaCrimeCSV():
 
 def CreateSmallUmbrellaCrimeFrom2020CSV():
     data = {}
-    crime_str = "%2C".join(valuecodes.Umbrella_crime.values())
-    time_str = "%2C".join(valuecodes.time_from_2020.values())
+    crime_str = "%2C".join(valuecodes.few_umbrella_crime.values())
+    time_str = "%2C".join(valuecodes.time_2021.values())
     base_url = "https://api.statbank.dk/v1/data/STRAF11/CSV?allowCodeOverrideInColumnNames=true&TID=" + time_str + "&OVERTR%C3%86D=" + crime_str
     num_of_municipalties = len(valuecodes.AREA.values())
     for i,k in enumerate(valuecodes.AREA.keys()):
@@ -136,7 +136,7 @@ def CreateSmallUmbrellaCrimeFrom2020CSV():
         if len(data[k]) > len(valuecodes.times)*len(valuecodes.CRIME):
             print(k)
     df = pd.concat(data.values(), axis=0, ignore_index=True)
-    df.to_csv("data/small_umbrella_terms_crimes_from_2020.csv", index=False)
+    df.to_csv("data/small_few_umbrella_terms_crimes_2021.csv", index=False)
     print(len(df))
 
 
