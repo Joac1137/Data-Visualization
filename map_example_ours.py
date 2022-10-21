@@ -1,5 +1,6 @@
 import altair as alt
 import geopandas as gpd
+import altair_viewer
 
 height = 200
 width = 200
@@ -7,10 +8,10 @@ spacing = 60
 
 
 alt.data_transformers.enable('data_server')
-#file = "small_umbrella_terms_crimes_from_2020"
+#file = "umbrella_terms_crimes_quarters"
 file = "small_umbrella_terms_crimes_quarters"
-
-big_fuck_df = gpd.read_file("data_with_geo/" + file +".geojson")
+path = "data_with_geo/" + file +".geojson"
+big_fuck_df = gpd.read_file(path)
 
 
 offence_selection = alt.selection_single(init={'offence':'Seksualforbrydelser i alt'})
@@ -85,5 +86,5 @@ column_chart = alt.vconcat(line_chart,bar_chart,spacing=spacing, data=big_fuck_d
 data_chart = alt.hconcat(map_chart,column_chart,data=big_fuck_df, spacing=spacing).resolve_scale(color='independent')
 
 
-data_chart.show()
+altair_viewer.show(data_chart)
 
