@@ -24,7 +24,7 @@ area_selection = alt.selection_single(fields=['label_dk'])
 
 
 
-bar_chart = alt.Chart().mark_bar(
+bars = alt.Chart().mark_bar(
 ).transform_filter(
     time_selection
 ).transform_filter(
@@ -41,8 +41,16 @@ bar_chart = alt.Chart().mark_bar(
         offence_selection, alt.value('red'), alt.value('lightgray')
     ),
     tooltip=['offence','crime:Q']
-).add_selection(offence_selection).properties(width="container")
+)
 
+text = bars.mark_text(
+    align='center',
+    baseline='middle',
+    dy=-10  # Nudges text to right so it doesn't appear on top of the bar
+).encode(
+    text='crime:Q'
+)
+bar_chart = (bars + text).add_selection(offence_selection).properties(width="container")
 
 
 line_chart = alt.Chart().mark_line(interpolate='step-after',point=alt.OverlayMarkDef(color="blue")
@@ -58,9 +66,13 @@ line_chart = alt.Chart().mark_line(interpolate='step-after',point=alt.OverlayMar
     y=alt.Y('crime:Q',scale=alt.Scale(zero=False)),
     tooltip=['tid','crime:Q'],
 
-).add_selection(time_selection).properties(width="container")
+).add_selection(time_selection).properties(width=800)
 
 
+
+column_select = alt.selection_single(fields=['scale'],
+                                     bind=alt.binding_select(options=['crime_pr_100k_inhabitants', 'crime_total'], name='scale'),
+                                     init={'scale': 'crime_pr_100k_inhabitants'})
 
 
 map_chart = alt.Chart().transform_lookup(
@@ -68,25 +80,32 @@ map_chart = alt.Chart().transform_lookup(
     from_=alt.LookupData(geometry, 'label_dk',['geometry','type'])
 ).mark_geoshape(
 ).transform_filter(
-    time_selection
-).transform_filter(
     offence_selection
+).transform_filter(
+    time_selection
 ).transform_aggregate(
     crime_total = 'sum(Anmeldte forbrydelser)',
     crime_pr_100k_inhabitants='sum(forbrydelser_pr_100k_indbygger)',
     avg_population = 'mean(population)',
     groupby=["type","geometry","label_dk"]
+).transform_fold(
+    fold=['crime_pr_100k_inhabitants', 'crime_total'],
+    as_=['scale', 'value']
+).transform_filter(
+    column_select
 ).encode(
     color=alt.condition(
         area_selection,
         alt.Color(
-            "crime_pr_100k_inhabitants:Q",
+            "value:Q",
             scale=alt.Scale(
                 scheme='viridis')
         ),
         alt.value('lightgray')),
     tooltip=['label_dk','crime_pr_100k_inhabitants:Q','crime_total:Q','avg_population:Q']
-).add_selection(area_selection).properties(
+).add_selection(area_selection).add_selection(
+    column_select
+).properties(
     height=800,
     width=600
 )
