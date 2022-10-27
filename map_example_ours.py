@@ -1,4 +1,5 @@
 import altair as alt
+import pandas as pd
 import geopandas as gpd
 import altair_viewer
 
@@ -6,12 +7,15 @@ height = 200
 width = 200
 spacing = 60
 
-
 alt.data_transformers.enable('data_server')
 #file = "umbrella_terms_crimes_quarters"
-file = "small_umbrella_terms_crimes_quarters"
-path = "data_with_geo/" + file +".geojson"
-big_fuck_df = gpd.read_file(path)
+file = "umbrella_terms_crimes_pop"
+#file = "small_umbrella_terms_crimes"
+path = "data/" + file +".csv"
+df = pd.read_csv(path,encoding="utf_8",index_col='Unnamed: 0')
+df['population_scaled'] = df['population'].div(100000)
+df['forbrydelser_pr_100k_indbygger'] = df['Anmeldte forbrydelser']/df['population_scaled']
+geometry = gpd.read_file("geodata/geometry.geojson")
 
 
 offence_selection = alt.selection_single(init={'offence':'Seksualforbrydelser i alt'})
@@ -32,7 +36,6 @@ bar_chart = alt.Chart().mark_bar(
     x=alt.X('offence:N', sort='y'),
     y=alt.Y(
         'crime:Q',
-        scale=alt.Scale(type="log",domainMin=1)  # Here the scale is applied
     ),
     color=alt.condition(
         offence_selection, alt.value('red'), alt.value('lightgray')
@@ -52,39 +55,47 @@ line_chart = alt.Chart().mark_line(interpolate='step-after',point=alt.OverlayMar
     groupby=['tid']
 ).encode(
     x='tid:O',
-    y='crime:Q',
-    tooltip=['tid','crime:Q']
+    y=alt.Y('crime:Q',scale=alt.Scale(zero=False)),
+    tooltip=['tid','crime:Q'],
+
 ).add_selection(time_selection).properties(width="container")
 
 
 
-map_chart = alt.Chart().mark_geoshape(
+
+map_chart = alt.Chart().transform_lookup(
+    lookup='label_dk',
+    from_=alt.LookupData(geometry, 'label_dk',['geometry','type'])
+).mark_geoshape(
 ).transform_filter(
     time_selection
 ).transform_filter(
     offence_selection
 ).transform_aggregate(
-    crime='sum(Anmeldte forbrydelser)',
+    crime_total = 'sum(Anmeldte forbrydelser)',
+    crime_pr_100k_inhabitants='sum(forbrydelser_pr_100k_indbygger)',
+    avg_population = 'mean(population)',
     groupby=["type","geometry","label_dk"]
 ).encode(
     color=alt.condition(
         area_selection,
         alt.Color(
-            "crime:Q",
+            "crime_pr_100k_inhabitants:Q",
             scale=alt.Scale(
                 scheme='viridis')
         ),
         alt.value('lightgray')),
-    tooltip=['label_dk','crime:Q']
+    tooltip=['label_dk','crime_pr_100k_inhabitants:Q','crime_total:Q','avg_population:Q']
 ).add_selection(area_selection).properties(
     height=800,
     width=600
 )
 
-column_chart = alt.vconcat(line_chart,bar_chart,spacing=spacing, data=big_fuck_df)
+column_chart = alt.vconcat(line_chart,bar_chart,spacing=spacing, data=df)
 
-data_chart = alt.hconcat(map_chart,column_chart,data=big_fuck_df, spacing=spacing).resolve_scale(color='independent')
+data_chart = alt.hconcat(map_chart,column_chart,data=df, spacing=spacing).resolve_scale(color='independent')
 
 
 altair_viewer.show(data_chart)
+
 

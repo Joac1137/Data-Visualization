@@ -172,11 +172,18 @@ def CreateJsonMini():
     print(len(df))
 
 
-
+def GetPopulations():
+    baseUrl = "https://api.statbank.dk/v1/data/FOLK1A/CSV?allowCodeOverrideInColumnNames=true&Tid=*&OMR%C3%85DE="
+    area_str = "%2C".join(valuecodes.AREA.values())
+    url = baseUrl+ area_str
+    r = requests.get(url)
+    csvStringIO = StringIO(r.text)
+    df = pd.read_csv(csvStringIO, delimiter=";")
+    df.to_csv("data/populations.csv", index=False)
 
 
 #CreateBigCSVMini()
 #CreateJsonMini()
 #CreateSmallSexyCSV()
-CreateSmallUmbrellaCrimeFrom2020CSV()
+#CreateSmallUmbrellaCrimeFrom2020CSV()
 #print(len(valuecodes.AREA)*len(valuecodes.times)*len(valuecodes.CRIME))
