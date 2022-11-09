@@ -1,5 +1,6 @@
 import geopandas as gpd
 import pandas as pd
+import valuecodes
 
 file = "umbrella_terms_crimes"
 """
@@ -27,5 +28,16 @@ pop_df = pd.read_csv("data/populations.csv", encoding="utf_8")
 pop_df = pop_df.rename(columns={'område': 'label_dk','Folketal den 1. i kvartalet':'population'})
 df = df.merge(pop_df, how="inner", on=['label_dk', 'tid'])
 file = file + "_pop"
+
+
+kommune_to_region ={}
+for k in valuecodes.region_to_kommune:
+    for v in valuecodes.region_to_kommune[k]:
+        kommune_to_region[v] = k
+print(kommune_to_region)
+
+df['region_dk'] = df.apply(lambda row: kommune_to_region[row['label_dk']], axis=1)
+file = file + "_regional"
+
 
 df.to_csv("data/"+ file + ".csv")
