@@ -4,26 +4,10 @@ import altair as alt
 
 
 alt.themes.enable("latimes")
-
-height = 200
-width = 200
-spacing = 60
-"""
-alt.data_transformers.enable('data_server')
-#file = "umbrella_terms_crimes_quarters"
-file = "umbrella_terms_crimes_pop"
-#file = "small_umbrella_terms_crimes"
-path = "data/" + file +".csv"
-df = pd.read_csv(path,encoding="utf_8",index_col='Unnamed: 0')
-df['population_scaled'] = df['population'].div(100000)
-df['forbrydelser_pr_100k_indbygger'] = df['Anmeldte forbrydelser']/df['population_scaled']
-df['tid'] = df['tid'].str.replace('K','-Q')
-df['tid'] = pd.to_datetime(df['tid'])
-df.to_csv("data/umbrella_data_prepared.csv")
-"""
+#df = pd.read_csv("data/umbrella_data_prepared.csv")
 geometry = gpd.read_file("geodata/geometry.geojson")
 
-offence_selection = alt.selection_single(init={'offence':'Seksualforbrydelser i alt'})
+offence_selection = alt.selection_single(init={'offence':'Sexual offences'})
 time_selection = alt.selection_interval(encodings=['x'])
 area_selection = alt.selection_multi(fields=['label_dk'], empty="all")
 
@@ -38,7 +22,7 @@ bars = alt.Chart().mark_bar(
 ).encode(
     x=alt.X('offence:N', sort='y',axis=alt.Axis(labelAngle=-20,title=None)),
     y=alt.Y(
-        'crime:Q',
+        'crime:Q',title="Reported crimes"
     ),
     color=alt.condition(
         offence_selection, alt.value('blue'), alt.value('lightgray')
@@ -78,8 +62,8 @@ overlay_line_chart = alt.Chart().mark_line(interpolate='step-after',point=alt.Ov
     crime='sum(Anmeldte forbrydelser)',
     groupby=['tid']
 ).encode(
-    x=alt.X('tid:T',axis=alt.Axis(labelAngle=-30,grid=False)),
-    y=alt.Y('crime:Q',scale=alt.Scale(zero=False)),
+    x=alt.X('tid:T',axis=alt.Axis(labelAngle=-30,grid=False,title="Time")),
+    y=alt.Y('crime:Q',scale=alt.Scale(zero=False),title="Reported crimes"),
     #color='label_dk:O',
     tooltip=['tid:T','crime:Q']
 ).add_selection(time_selection).properties(width=900, height=200)
@@ -115,14 +99,14 @@ map_chart = alt.Chart().transform_lookup(
     groupby=["geo","label_dk"]
 ).transform_fold(
     fold=['municipal_crime_pr_100k_inhabitants', 'municipal_crime_total'],
-    as_=['scale', 'value']
+    as_=['scale', 'Crimes']
 ).transform_filter(
     column_select
 ).encode(
     shape="geo:G",
     #strokeWidth=alt.StrokeWidthValue(0, condition=alt.StrokeWidthValue(3, selection=area_selection.name)),
     color= alt.condition(area_selection,alt.Color(
-        "value:Q",
+        "Crimes:Q",
         scale=alt.Scale(
             scheme='viridis')
     ),alt.value('lightgray')),
@@ -133,7 +117,7 @@ map_chart = alt.Chart().transform_lookup(
 
 
 
-row_chart = alt.hconcat(map_chart,bar_chart, spacing=spacing, data="https://raw.githubusercontent.com/Joac1137/Data-Visualization/main/data/umbrella_data_prepared.csv").resolve_scale(color='independent')
+row_chart = alt.hconcat(map_chart,bar_chart, spacing=60, data="https://raw.githubusercontent.com/Joac1137/Data-Visualization/main/data/umbrella_data_prepared.csv").resolve_scale(color='independent')
 
 chart = alt.vconcat(row_chart,line_chart, data="https://raw.githubusercontent.com/Joac1137/Data-Visualization/main/data/umbrella_data_prepared.csv")
 

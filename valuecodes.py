@@ -105,6 +105,12 @@ Umbrella_crime = {"Seksualforbrydelser i alt":"11",
 				  "Særlove i alt":"3",
 }
 
+Crime_Translation = {"Seksualforbrydelser i alt":"Sexual offences",
+					 "Voldsforbrydelser i alt":"Crimes of violence",
+					 "Ejendomsforbrydelser i alt":"Offences against property",
+					 "Andre straffelovsforbrydelser i alt":"Other offences",
+					 "Særlove i alt":"Special acts"
+					 }
 few_umbrella_crime = {"Seksualforbrydelser i alt":"11",
 				  "Voldsforbrydelser i alt":"12",}
 CRIME = {
