@@ -122,8 +122,8 @@ row_chart = alt.hconcat(map_chart,bar_chart, spacing=60, data="https://raw.githu
 chart = alt.vconcat(row_chart,line_chart, data="https://raw.githubusercontent.com/Joac1137/Data-Visualization/main/data/umbrella_data_prepared.csv")
 
 
-text_file = open("index.html", "w")
-n = text_file.write(chart.to_html())
-text_file.close()
-#chart.show()
+#text_file = open("index.html", "w")
+#n = text_file.write(chart.to_html())
+#text_file.close()
+chart.show()
 
