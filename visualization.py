@@ -7,11 +7,11 @@ alt.themes.enable("latimes")
 #df = pd.read_csv("data/umbrella_data_prepared.csv")
 geometry = gpd.read_file("geodata/geometry.geojson")
 
-offence_selection = alt.selection_single(init={'offence':'Sexual offences'})
+offence_selection = alt.selection_single()
 time_selection = alt.selection_interval(encodings=['x'])
 area_selection = alt.selection_multi(fields=['label_dk'], empty="all")
 
-bars = alt.Chart().mark_bar(size=25
+bars = alt.Chart().mark_bar(size=35
 ).transform_filter(
     time_selection
 ).transform_filter(
@@ -37,7 +37,7 @@ text = bars.mark_text(
 ).encode(
     text='crime:Q'
 )
-bar_chart = (bars + text).add_selection(offence_selection).properties(width=200,height=400)
+bar_chart = (bars + text).add_selection(offence_selection).properties(width=270,height=430)
 
 
 area_chart = alt.Chart().mark_area(
@@ -117,7 +117,7 @@ map_chart = alt.Chart().transform_lookup(
         "Crimes:Q",
         scale=alt.Scale(
             scheme='viridis')
-    ),alt.value('lightgray')),
+    ,title="Reported crimes"),alt.value('lightgray')),
     tooltip=['label_dk:O','municipal_crime_pr_100k_inhabitants:Q','municipal_crime_total:Q','avg_population:Q']
 ).add_selection(area_selection).add_selection(
     column_select
@@ -130,17 +130,17 @@ row_chart = alt.hconcat(map_chart,bar_chart, spacing=60, data="https://raw.githu
 chart = alt.vconcat(row_chart,line_chart, data="https://raw.githubusercontent.com/Joac1137/Data-Visualization/main/data/umbrella_data_prepared.csv")
 
 
-#text_file = open("index.html", "w")
-#n = text_file.write(chart.to_html())
-#text_file.close()
-chart.show()
+text_file = open("index.html", "w")
+n = text_file.write(chart.to_html())
+text_file.close()
+#chart.show()
 
 #manually add to html
 """
 <style>
 form.vega-bindings {
     position: absolute;
-right: 0px;
+left: 0px;
 top: 0px;
 }
 </style>
