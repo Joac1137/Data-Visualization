@@ -41,7 +41,7 @@ bar_chart = (bars + text).add_selection(offence_selection).properties(width=270,
 
 
 area_chart = alt.Chart().mark_area(
-                                   ).transform_filter(
+).transform_filter(
     offence_selection
 ).transform_filter(
     area_selection
@@ -54,7 +54,7 @@ area_chart = alt.Chart().mark_area(
 ).encode(
     x=alt.X('tid:T',axis=alt.Axis(labelAngle=-30,grid=False),title="Time"),
     y=alt.Y('crime:Q',scale=alt.Scale(zero=False),title="Reported crimes"),
-    color=alt.Color('label_dk:O', legend=None),
+    color=alt.Color('order:O', legend=None),
     tooltip=['label_dk:O','crime:Q','tid:T'],
     order=alt.Order('order:Q',sort='descending')
 ).add_selection(time_selection).properties(width=900, height=200)
