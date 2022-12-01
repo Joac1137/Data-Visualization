@@ -7,7 +7,7 @@ alt.themes.enable("latimes")
 #df = pd.read_csv("data/umbrella_data_prepared.csv")
 geometry = gpd.read_file("geodata/geometry.geojson")
 
-offence_selection = alt.selection_single()
+offence_selection = alt.selection_single(fields=['offence'])
 time_selection = alt.selection_interval(encodings=['x'])
 area_selection = alt.selection_multi(fields=['label_dk'], empty="all")
 
@@ -20,7 +20,7 @@ bars = alt.Chart().mark_bar(size=35
     crime='sum(Anmeldte forbrydelser)',
     groupby=['offence']
 ).encode(
-    x=alt.X('offence:N', sort='y',axis=alt.Axis(labelAngle=-20,title=None)),
+    x=alt.X('offence:N', sort=['Sexual offences', 'Other offences', 'Crimes of violence','Special acts','Offences against property'],axis=alt.Axis(labelAngle=-20,title=None)),
     y=alt.Y(
         'crime:Q',title="Reported crimes"
     ),
