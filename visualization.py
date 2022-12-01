@@ -11,7 +11,7 @@ offence_selection = alt.selection_single(init={'offence':'Sexual offences'})
 time_selection = alt.selection_interval(encodings=['x'])
 area_selection = alt.selection_multi(fields=['label_dk'], empty="all")
 
-bars = alt.Chart().mark_bar(
+bars = alt.Chart().mark_bar(size=25
 ).transform_filter(
     time_selection
 ).transform_filter(
@@ -40,20 +40,27 @@ text = bars.mark_text(
 bar_chart = (bars + text).add_selection(offence_selection).properties(width=200,height=400)
 
 
-area_chart = alt.Chart().mark_area(interpolate='step-after'
+area_chart = alt.Chart().mark_area(
                                    ).transform_filter(
     offence_selection
 ).transform_filter(
     area_selection
+).transform_aggregate(
+    crime='sum(Anmeldte forbrydelser)',
+    groupby=['tid','label_dk']
+).transform_joinaggregate(
+    order='sum(crime)',
+    groupby=['label_dk']
 ).encode(
-    x=alt.X('tid:T',axis=alt.Axis(labelAngle=-30,grid=False)),
-    y=alt.Y('Anmeldte forbrydelser:Q',scale=alt.Scale(zero=False)),
+    x=alt.X('tid:T',axis=alt.Axis(labelAngle=-30,grid=False),title="Time"),
+    y=alt.Y('crime:Q',scale=alt.Scale(zero=False),title="Reported crimes"),
     color=alt.Color('label_dk:O', legend=None),
-    tooltip=['label_dk:O','Anmeldte forbrydelser:Q']
-).properties(width=900, height=200)
+    tooltip=['label_dk:O','crime:Q','tid:T'],
+    order=alt.Order('order:Q',sort='descending')
+).add_selection(time_selection).properties(width=900, height=200)
 
 
-overlay_line_chart = alt.Chart().mark_line(interpolate='step-after',point=alt.OverlayMarkDef(color="blue")
+overlay_line_chart = alt.Chart().mark_point(
                                            ).transform_filter(
     offence_selection
 ).transform_filter(
@@ -66,10 +73,11 @@ overlay_line_chart = alt.Chart().mark_line(interpolate='step-after',point=alt.Ov
     y=alt.Y('crime:Q',scale=alt.Scale(zero=False),title="Reported crimes"),
     #color='label_dk:O',
     tooltip=['tid:T','crime:Q']
-).add_selection(time_selection).properties(width=900, height=200)
+).properties(width=900, height=200)
 
 line_chart = area_chart + overlay_line_chart
 
+#line_chart = area_chart
 
 #.transform_aggregate(
 #crime='sum(Anmeldte forbrydelser)',
@@ -122,8 +130,8 @@ row_chart = alt.hconcat(map_chart,bar_chart, spacing=60, data="https://raw.githu
 chart = alt.vconcat(row_chart,line_chart, data="https://raw.githubusercontent.com/Joac1137/Data-Visualization/main/data/umbrella_data_prepared.csv")
 
 
-#text_file = open("index.html", "w")
-#n = text_file.write(chart.to_html())
-#text_file.close()
-chart.show()
+text_file = open("index.html", "w")
+n = text_file.write(chart.to_html())
+text_file.close()
+#chart.show()
 
