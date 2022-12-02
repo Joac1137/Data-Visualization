@@ -116,7 +116,7 @@ map_chart = alt.Chart().transform_lookup(
     color= alt.condition(area_selection,alt.Color(
         "Crimes:Q",
         scale=alt.Scale(
-            scheme='viridis')
+            scheme='blues')
     ,title="Reported crimes"),alt.value('lightgray')),
     tooltip=['label_dk:O','municipal_crime_pr_100k_inhabitants:Q','municipal_crime_total:Q','avg_population:Q']
 ).add_selection(area_selection).add_selection(
